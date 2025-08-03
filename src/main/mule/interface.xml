@@ -3,7 +3,7 @@
     <http:listener-config name="churn-prediction-api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8083" />
     </http:listener-config>
-    <apikit:config name="churn-prediction-api-config" api="resource::af5552ca-fce0-4bab-b132-46660313f2f0:churn-prediction-api:2.0.0:raml:zip:churn-prediction-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="churn-prediction-api-config" api="resource::af5552ca-fce0-4bab-b132-46660313f2f0:churn-prediction-api:2.0.1:raml:zip:churn-prediction-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <http:request-config name="HTTP_Request_config_to_FastAPI" doc:name="HTTP Request configuration" doc:id="8c1ac82d-655b-440b-8ea5-bade931cceb1">
         <http:request-connection host="localhost" port="5000" />
     </http:request-config>
@@ -152,24 +152,22 @@ payload]]></ee:set-payload>
             </ee:message>
         </ee:transform>
     </flow>
-    <flow name="post:\predict:churn-prediction-api-config">
-        <flow-ref doc:name="Flow Reference" doc:id="72d69813-664e-46d0-b845-b57797751d2f" name="predict_score_churn" />
-    </flow>
     <flow name="get:\clients\(customerId)\interactions:churn-prediction-api-config">
-    <flow-ref doc:name="Flow Reference" name="get_clients_interactions" />
-    
-    <ee:transform doc:name="Extract First Object from Array">
-        <ee:message>
-            <ee:set-payload><![CDATA[%dw 2.0
+        <flow-ref doc:name="Flow Reference" name="get_clients_interactions" />
+        <ee:transform doc:name="Extract First Object from Array">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 // Prend le premier élément du tableau retourné par le sous-flux
-payload[0]
-]]></ee:set-payload>
-        </ee:message>
-    </ee:transform>
-</flow>
+payload[0]]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
     <flow name="post:\churn-records:application\json:churn-prediction-api-config">
-		<flow-ref doc:name="Flow Reference" doc:id="f5d2e1af-af2b-44ea-a958-5f7ce40388db" name="update_clients_churn" />
+        <flow-ref doc:name="Flow Reference" doc:id="f5d2e1af-af2b-44ea-a958-5f7ce40388db" name="update_clients_churn" />
+    </flow>
+    <flow name="post:\predict:application\json:churn-prediction-api-config">
+		<flow-ref doc:name="Flow Reference" doc:id="72d69813-664e-46d0-b845-b57797751d2f" name="predict_score_churn" />
     </flow>
 </mule>
