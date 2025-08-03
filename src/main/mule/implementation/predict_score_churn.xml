@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
-	<flow name="predict_score_churn" doc:id="f79546a4-0229-4cb1-95fb-6b5855f832ae" >
-		<ee:transform doc:name="Transform Message" doc:id="7ec0c7f3-2313-43cf-a1b0-f7ae7ea4d8b4" >
+	
+    <flow name="predict_score_churn" doc:id="f79546a4-0229-4cb1-95fb-6b5855f832ae" >
+		
+        <ee:transform doc:name="Transform Message" doc:id="7ec0c7f3-2313-43cf-a1b0-f7ae7ea4d8b4" >
 			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+                <ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-vars.customer_interactions[0]]]></ee:set-payload>
+payload
+]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<http:request method="POST" doc:name="Request" doc:id="71e910ec-55a7-4300-8d1f-51b2eb7105ae" config-ref="HTTP_Request_config_to_FastAPI" path="/predict"/>
-	</flow>
+		
+        <http:request method="POST" doc:name="Request" doc:id="71e910ec-55a7-4300-8d1f-51b2eb7105ae" config-ref="HTTP_Request_config_to_FastAPI" path="/predict"/>
+	
+    </flow>
 </mule>

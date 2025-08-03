@@ -1,31 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+    xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<flow name="update_clients_churn" doc:id="6bf3cd8f-55e6-4ef3-b34c-6c90b2ec1e4f" >
+	
+    <flow name="update_clients_churn" doc:id="6bf3cd8f-55e6-4ef3-b34c-6c90b2ec1e4f">
+		
+        <set-variable value="#[payload.CustomerID]" doc:name="Save CustomerID" variableName="originalCustomerID" />
+
 		<db:insert doc:name="Insert" doc:id="9a53fb72-e78c-43f3-a910-69f0ef438ef7" config-ref="Database_Config">
-			<db:sql ><![CDATA[INSERT INTO churn_clients (CustomerID, EmailAddress, FullName, predictionLabel, churnProbability, isChurnRisk, modelVersion) VALUES (:CustomerID, :EmailAddress, :FullName, :predictionLabel, :churnProbability, :isChurnRisk, :modelVersion)
-    ]]></db:sql>
-			<db:input-parameters ><![CDATA[#[{CustomerID: payload.CustomerID, 
-EmailAddress:vars.customer_interactions[0].EmailAddress, 
-FullName:vars.customer_interactions[0].FullName,
-predictionLabel: payload.predictionLabel, 
-churnProbability: payload.churnProbability, 
-isChurnRisk: payload.isChurnRisk, 
-modelVersion: payload.modelVersion}]]]></db:input-parameters>
+			<db:sql><![CDATA[INSERT INTO churn_clients (CustomerID, EmailAddress, FullName, predictionLabel, churnProbability, isChurnRisk, modelVersion) VALUES (:CustomerID, :EmailAddress, :FullName, :predictionLabel, :churnProbability, :isChurnRisk, :modelVersion)]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+                CustomerID: payload.CustomerID,
+                EmailAddress: payload.EmailAddress,
+                FullName: payload.FullName,
+                predictionLabel: payload.predictionDetails.predictionLabel,
+                churnProbability: payload.predictionDetails.churnProbability,
+                isChurnRisk: payload.predictionDetails.isChurnRisk,
+                modelVersion: payload.predictionDetails.modelVersion
+            }]]]></db:input-parameters>
 		</db:insert>
-		<ee:transform doc:name="Formater la réponse finale de l'API" doc:id="4c5590db-edd5-452d-a342-632d90e576e2" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		
+        <ee:transform doc:name="Formater la réponse finale de l'API" doc:id="4c5590db-edd5-452d-a342-632d90e576e2">
+			<ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
-    message: "The customer was inserted successfully."
-}]]></ee:set-payload>
+    "message": "Le score de churn pour le client " ++ (vars.originalCustomerID as String) ++ " a été enregistré.",
+    "recordId": vars.originalCustomerID
+}
+]]></ee:set-payload>
 			</ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus">201</ee:set-variable>
+            </ee:variables>
 		</ee:transform>
 	</flow>
 </mule>
